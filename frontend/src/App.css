@@ -1079,3 +1079,7 @@ td.speech-diff {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+.login-card .brand-logo {
+  align-self: flex-start;
+}
