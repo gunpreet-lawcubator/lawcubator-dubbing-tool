@@ -31,6 +31,7 @@ class Job:
     job_id: str
     status: str = "queued"
     step: str = ""
+    step_detail: str = ""
     error: str = ""
     segments_preview: list = field(default_factory=list)
     output_audio_path: str = ""
@@ -170,6 +171,7 @@ def update_subtitles(job_id: str, edits: list[dict]) -> bool:
 
 def _set_step(job: Job, step: str) -> None:
     job.step = step
+    job.step_detail = ""
 
 
 def _run_pipeline(
@@ -346,6 +348,7 @@ def _run_pipeline(
             video_work_dir = os.path.join(job_dir, "video_segments")
             video_to_mux, measured_durations = video_retime.retime_video(
                 video_path, segments, video_factors_by_index, video_work_dir,
+                on_progress=lambda done, total: setattr(job, "step_detail", f"part {done} of {total}"),
             )
 
             # New cumulative timeline from *measured* (not theoretical)

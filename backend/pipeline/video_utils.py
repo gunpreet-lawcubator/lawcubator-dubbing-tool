@@ -50,7 +50,7 @@ def get_video_fps(video_path: str) -> float:
 def extract_audio(video_path: str, output_wav_path: str) -> None:
     subprocess.run(
         [
-            "ffmpeg", "-y", "-i", video_path,
+            "ffmpeg", "-nostdin", "-y", "-i", video_path,
             "-ac", "1", "-ar", "16000",
             output_wav_path,
         ],
@@ -87,7 +87,7 @@ def mux_video_with_audio(video_path: str, audio_path: str, output_path: str, sub
         subtitle_filename = os.path.basename(subtitle_path)
         output_path = os.path.relpath(output_path, cwd)
 
-    cmd = ["ffmpeg", "-y", "-i", video_arg, "-i", audio_arg]
+    cmd = ["ffmpeg", "-nostdin", "-y", "-i", video_arg, "-i", audio_arg]
     if subtitle_filename:
         cmd += ["-vf", f"ass={subtitle_filename}"]
         cmd += ["-map", "0:v:0", "-map", "1:a:0", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-c:a", "aac"]
@@ -115,7 +115,7 @@ def time_stretch(input_path: str, output_path: str, tempo: float) -> None:
 
     subprocess.run(
         [
-            "ffmpeg", "-y", "-i", input_path,
+            "ffmpeg", "-nostdin", "-y", "-i", input_path,
             "-filter:a", ",".join(filters),
             output_path,
         ],

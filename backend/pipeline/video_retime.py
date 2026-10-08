@@ -53,19 +53,21 @@ def compute_video_factors(segments: list) -> list[dict]:
 
 
 def _cut_and_retime(video_path: str, start: float, end: float, factor: float, fps: float, output_path: str) -> None:
-    vf = f"trim=start={start:.3f}:end={end:.3f},setpts=(PTS-STARTPTS)*{factor:.6f}"
+    # Seek on the input (not a trim filter): the trim filter decodes from the
+    # start of the file for every piece, which is quadratic on long videos.
+    vf = f"setpts=(PTS-STARTPTS)*{factor:.6f}"
     subprocess.run(
         [
-            "ffmpeg", "-y", "-i", video_path,
+            "ffmpeg", "-nostdin", "-y", "-ss", f"{start:.3f}", "-t", f"{end - start:.3f}", "-i", video_path,
             "-vf", vf, "-an",
-            "-r", f"{fps:.5f}", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-r", f"{fps:.5f}", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p",
             output_path,
         ],
         check=True, capture_output=True,
     )
 
 
-def retime_video(video_path: str, segments: list, factors_by_index: dict, work_dir: str) -> tuple[str, list[float]]:
+def retime_video(video_path: str, segments: list, factors_by_index: dict, work_dir: str, on_progress=None) -> tuple[str, list[float]]:
     """Cuts+retimes the video per factors_by_index (already clamped/resolved
     by the caller), preserving untouched gaps between segments, and
     concatenates the result into one video file.
@@ -79,6 +81,17 @@ def retime_video(video_path: str, segments: list, factors_by_index: dict, work_d
     fps = video_utils.get_video_fps(video_path)
     total_duration = video_utils.get_duration(video_path)
 
+    total_pieces = len(segments)
+    probe = 0.0
+    for seg in segments:
+        total_pieces += seg.start > probe
+        probe = seg.end
+    total_pieces += probe < total_duration
+
+    def tick():
+        if on_progress:
+            on_progress(len(pieces), total_pieces)
+
     pieces: list[str] = []
     segment_piece_indices: list[int] = []
     cursor = 0.0
@@ -87,17 +100,20 @@ def retime_video(video_path: str, segments: list, factors_by_index: dict, work_d
             gap_path = os.path.join(work_dir, f"gap_{i:03d}.mp4")
             _cut_and_retime(video_path, cursor, seg.start, 1.0, fps, gap_path)
             pieces.append(gap_path)
+            tick()
 
         seg_path = os.path.join(work_dir, f"seg_{i:03d}.mp4")
         _cut_and_retime(video_path, seg.start, seg.end, factors_by_index[i], fps, seg_path)
         pieces.append(seg_path)
         segment_piece_indices.append(len(pieces) - 1)
+        tick()
         cursor = seg.end
 
     if cursor < total_duration:
         gap_path = os.path.join(work_dir, f"gap_{len(segments):03d}.mp4")
         _cut_and_retime(video_path, cursor, total_duration, 1.0, fps, gap_path)
         pieces.append(gap_path)
+        tick()
 
     measured_durations = [video_utils.get_duration(pieces[idx]) for idx in segment_piece_indices]
 
@@ -109,7 +125,7 @@ def retime_video(video_path: str, segments: list, factors_by_index: dict, work_d
     output_path = os.path.join(work_dir, "retimed_video.mp4")
     subprocess.run(
         [
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", filelist_path,
+            "ffmpeg", "-nostdin", "-y", "-f", "concat", "-safe", "0", "-i", filelist_path,
             "-c", "copy", output_path,
         ],
         check=True, capture_output=True,

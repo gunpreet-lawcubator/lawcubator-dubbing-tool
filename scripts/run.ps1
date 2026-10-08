@@ -68,7 +68,7 @@ while ($true) {
 
     Write-Host "Starting the app..."
     try {
-        $proc = Start-Process -FilePath $venvPython -ArgumentList "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$AppPort" -NoNewWindow -PassThru
+        $proc = Start-Process -FilePath $venvPython -ArgumentList "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "$AppPort", "--no-access-log" -NoNewWindow -PassThru
     } catch {
         Write-Host "Couldn't start the app."
         Write-Host $_.Exception.Message

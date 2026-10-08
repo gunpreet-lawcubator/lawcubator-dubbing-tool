@@ -385,6 +385,7 @@ def job_status(job_id: str):
         "job_id": job.job_id,
         "status": job.status,
         "step": job.step,
+        "step_detail": job.step_detail,
         "error": job.error,
     }
     if job.status == "needs_review":

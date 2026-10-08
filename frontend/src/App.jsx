@@ -450,7 +450,7 @@ function App() {
           )}
 
           {jobStatus && !isDone && !needsReview && (
-            <ProgressSteps languageLabel={selectedLanguage?.label} step={jobStatus.step} status={jobStatus.status} error={jobStatus.error} />
+            <ProgressSteps languageLabel={selectedLanguage?.label} step={jobStatus.step} stepDetail={jobStatus.step_detail} status={jobStatus.status} error={jobStatus.error} />
           )}
 
           {needsReview && <ReviewPanel flaggedSegments={jobStatus.flagged_segments} onSubmit={handleResolve} />}

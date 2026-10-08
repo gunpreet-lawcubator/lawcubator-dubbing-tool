@@ -36,7 +36,7 @@ function StepIcon({ state }) {
   return <span className="step-icon step-icon-pending" />;
 }
 
-export default function ProgressSteps({ languageLabel, step, status, error }) {
+export default function ProgressSteps({ languageLabel, step, stepDetail, status, error }) {
   const labels = stepLabels(languageLabel);
   const currentStepIndex = STEP_ORDER.indexOf(step);
 
@@ -56,7 +56,10 @@ export default function ProgressSteps({ languageLabel, step, status, error }) {
           return (
             <li key={s} className={`step step-${state}`}>
               <StepIcon state={state} />
-              <span>{labels[s]}</span>
+              <span>
+                {labels[s]}
+                {state === "active" && stepDetail ? ` (${stepDetail})` : ""}
+              </span>
             </li>
           );
         })}
