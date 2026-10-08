@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+openai
+requests
+pydub
+audioop-lts; python_version >= "3.13"
+python-multipart

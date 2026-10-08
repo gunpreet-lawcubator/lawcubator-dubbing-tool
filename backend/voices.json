@@ -1,0 +1,26 @@
+[
+  {
+    "code": "hi",
+    "label": "Hindi",
+    "voice_id": "kZKm3BYbXfahOLAxYZG0",
+    "is_cjk": false
+  },
+  {
+    "code": "mr",
+    "label": "Marathi",
+    "voice_id": "dSEhEXLzhnZEytnJ2rRy",
+    "is_cjk": false
+  },
+  {
+    "code": "bn",
+    "label": "Bengali",
+    "voice_id": "70QpbCWFDvTpWo8ZKOUb",
+    "is_cjk": false
+  },
+  {
+    "code": "zh",
+    "label": "Mandarin (Chinese)",
+    "voice_id": "4NQthjVhIGGVfL3Si000",
+    "is_cjk": true
+  }
+]

@@ -1,0 +1,15 @@
+backend/venv/
+backend/.env
+output/
+__pycache__/
+*.pyc
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+.claude/
+ashin-install-command.txt
+pipeline_overview.excalidraw
+
+# Customer videos + transcripts stay local; only the default music ships.
+input/*
+!input/bgm/

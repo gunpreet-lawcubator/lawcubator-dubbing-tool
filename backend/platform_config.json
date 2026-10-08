@@ -1,0 +1,21 @@
+{
+  "default_logo_intro_filename": "Lawcubator_Intro_BGM.mp3",
+  "default_main_bgm_filename": "bgm.mp3",
+  "logo_intro_fade_in": 0.5,
+  "logo_intro_fade_out": 1.5,
+  "logo_intro_volume_pct": 100,
+  "main_bgm_fade_in": 1,
+  "main_bgm_fade_out": 4,
+  "main_bgm_volume_pct": 12,
+  "subtitles_enabled": true,
+  "subtitle_font_size_pct": 0.039,
+  "subtitle_text_color": "#FFFFFF",
+  "subtitle_background_color": "#000000",
+  "subtitle_background_opacity": 100,
+  "subtitle_margin_v_pct": 0.056,
+  "subtitle_margin_lr_pct": 0.0625,
+  "subtitle_padding_x_pct": 0.6,
+  "subtitle_padding_y_pct": 0.35,
+  "subtitle_corner_radius_pct": 0.35,
+  "subtitle_max_lines_per_cue": 2
+}
