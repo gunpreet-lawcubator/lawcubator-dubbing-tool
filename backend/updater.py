@@ -1,13 +1,13 @@
 """Self-update from GitHub Releases. Only active in an installed copy
 (run.ps1 sets LAWCUBATOR_MANAGED=1), never in a dev checkout."""
 import io
-import json
 import os
 import shutil
 import threading
 import time
-import urllib.request
 import zipfile
+
+import requests
 
 GITHUB_REPO = "gunpreet-lawcubator/lawcubator-dubbing-tool"
 RESTART_EXIT_CODE = 42  # run.ps1 relaunches the app on this code
@@ -16,6 +16,7 @@ INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Never overwritten by an update (the user's own data); created only if absent.
 _KEEP_IF_EXISTS = ("backend/voices.json", "input/")
 
+_HEADERS = {"Accept": "application/vnd.github+json", "User-Agent": "lawcubator-dubbing-tool"}
 _cache: dict = {"at": 0.0, "release": None}
 
 
@@ -40,12 +41,9 @@ def _latest_release() -> dict | None:
         return _cache["release"]
     release = None
     try:
-        req = urllib.request.Request(
-            f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest",
-            headers={"Accept": "application/vnd.github+json", "User-Agent": "lawcubator-dubbing-tool"},
-        )
-        with urllib.request.urlopen(req, timeout=8) as r:
-            release = json.load(r)
+        r = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", headers=_HEADERS, timeout=8)
+        r.raise_for_status()
+        release = r.json()
     except Exception:
         release = None  # offline / rate-limited: just report "no update"
     _cache.update(at=time.time(), release=release)
@@ -98,8 +96,9 @@ def apply_update() -> str:
     if not info["update_available"]:
         raise RuntimeError("Already up to date")
     url = _zip_url(_latest_release())
-    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "lawcubator-dubbing-tool"}), timeout=120) as r:
-        data = r.read()
+    r = requests.get(url, headers=_HEADERS, timeout=120)
+    r.raise_for_status()
+    data = r.content
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         if "VERSION" not in zf.namelist():
             raise RuntimeError("Downloaded update looks invalid")
